@@ -114,24 +114,26 @@ let createNewUser = (data) => {
                     errMessage: "Your email is already in used, please try another email",
 
                 });
+            } else {
+
+                let hashPasswordFromBcrypt = await hashUserPassword(data.password);
+                await db.User.create({
+                    email: data.email,
+                    password: hashPasswordFromBcrypt,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    address: data.address,
+                    gender: data.gender === '1' ? true : false,
+                    roleId: data.roleId,
+                    phonenumber: data.phonenumber,
+
+                })
+                resolve({
+                    errCode: 0,
+                    errMessage: "OKeee",
+
+                });
             }
-            let hashPasswordFromBcrypt = await hashUserPassword(data.password);
-            await db.User.create({
-                email: data.email,
-                password: hashPasswordFromBcrypt,
-                firstName: data.firstName,
-                lastName: data.lastName,
-                address: data.address,
-                gender: data.gender === '1' ? true : false,
-                roleId: data.roleId,
-                phonenumber: data.phonenumber,
-
-            })
-            resolve({
-                errCode: 0,
-                errMessage: "OKeee",
-
-            });
         } catch (e) {
             reject(e);
         }
@@ -143,7 +145,7 @@ let deleteUser = (userId) => {
         let user = await db.User.findOne({
             where: { id: userId }
         })
-        console.log(user)
+
 
         if (!user) {
             resolve({
@@ -218,6 +220,34 @@ let UpdateUserData = (data) => {
     })
 }
 
+let getAllCodeService = (typeInput) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!typeInput) {
+                resolve({
+                    errCode: 1,
+                    errMessage: "Missing required parameters!"
+                });
+
+            } else {
+                let res = {};
+                let allcode = await db.Allcode.findAll({
+                    where: {
+                        type: typeInput
+                    }
+                });
+                res.errCode = 0;
+                res.data = allcode
+                resolve(res);
+            }
+
+
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 
 module.exports = {
     handleUserLogin,
@@ -226,4 +256,5 @@ module.exports = {
     createNewUser,
     deleteUser,
     UpdateUserData,
+    getAllCodeService,
 }
